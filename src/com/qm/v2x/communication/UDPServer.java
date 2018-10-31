@@ -46,4 +46,7 @@ public class UDPServer {
             }
         }
     }
+    public static void main(String[] args) {
+		UDPServer server = new UDPServer();
+	}
 }
