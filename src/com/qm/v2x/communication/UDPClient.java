@@ -14,30 +14,37 @@ public class UDPClient {
     private static void setSELF_ID(int sELF_ID) {
 		SELF_ID = sELF_ID;
 	}
-
+    
+    private double longitude;
+    private double latitude;
+    private double speedRate;
+    private double pathAngle;
+    
+    public String setSendStr() {
+    	sendStr = SELF_ID + ",";
+    	sendStr += longitude + ",";
+    	sendStr += latitude + ",";
+    	sendStr += speedRate + ",";
+    	sendStr += pathAngle;
+    	return sendStr;
+    }
+    
 	private DatagramSocket datagramSocket;
     private DatagramPacket datagramPacket;
     
     public UDPClient(int id) {
     	setSELF_ID(id);
     	try {
-            /*** 发送数据***/
-            datagramSocket = new DatagramSocket();	// 初始化datagramSocket,注意与前面Server端实现的差别
-            byte[] buf = sendStr.getBytes();		// 使用DatagramPacket(byte buf[], int length, InetAddress address, int port)函数组装发送UDP数据报
-            InetAddress address = InetAddress.getByName(netAddress);
-            datagramPacket = new DatagramPacket(buf, buf.length, address, PORT_NUM);
-            // 发送数据
-            datagramSocket.send(datagramPacket);
-           
-            // 接收数据
-            byte[] receBuf = new byte[1024];
-            DatagramPacket recePacket = new DatagramPacket(receBuf, receBuf.length);
-            datagramSocket.receive(recePacket);
-           
-            String receStr = new String(recePacket.getData(), 0 , recePacket.getLength());
-            System.out.println("Client Rece Ack:" + receStr);
-            System.out.println(recePacket.getPort());
-           
+    		while(true) {
+	            /*** 发送数据***/
+	            datagramSocket = new DatagramSocket();	// 初始化datagramSocket,注意与前面Server端实现的差别
+	            sendStr = setSendStr();
+	            byte[] buf = sendStr.getBytes();		// 使用DatagramPacket(byte buf[], int length, InetAddress address, int port)函数组装发送UDP数据报
+	            InetAddress address = InetAddress.getByName(netAddress);
+	            datagramPacket = new DatagramPacket(buf, buf.length, address, PORT_NUM);
+	            // 发送数据
+	            datagramSocket.send(datagramPacket);
+    		}
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
