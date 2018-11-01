@@ -3,7 +3,7 @@ ompiled class file
 
 # Log file
 *.log
-
+*.classpath
 # BlueJ files
 *.ctxt
 
