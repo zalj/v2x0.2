@@ -2,6 +2,9 @@ package com.qm.v2x.property;
 
 import java.io.IOException;
 
+import com.qm.v2x.util.Geo;
+import com.qm.v2x.util.posUtil;
+
 public class CarProperty implements Comparable<CarProperty>{
 	private final int CAR_ID = 1;
 	private final int LONGITUDE = 2;
@@ -54,6 +57,50 @@ public class CarProperty implements Comparable<CarProperty>{
 		/**
 		 * Ready to complete
 		 */
+		
+		double[] coord1=Geo.convertToXY(longitude, latitude);
+    	double x1=coord1[0];
+    	double y1=coord1[0];
+    	double[] coord2=Geo.convertToXY(anotherCar.longitude, anotherCar.latitude);
+    	double x2=coord2[0];
+    	double y2=coord2[0];
+		
+		//FCW
+		if( posUtil.getDistance(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude())<20.0 &&
+				posUtil.verticalDistance(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude(), pathAngle)<3.5 &&
+					posUtil.inFront(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude(), pathAngle) &&
+						Math.abs(pathAngle-anotherCar.getPathAngle())<20.0) {
+			System.out.println("FCW");
+		}
+		
+		//ICW
+		if( posUtil.getDistance(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude())<50.0 &&
+				(Math.abs(pathAngle-anotherCar.getPathAngle())>70.0 && Math.abs(pathAngle-anotherCar.getPathAngle())<110.0)) {
+			
+//			double[] CollisionXY=posUtil.calculateCollisionPointXY( longitude, latitude, pathAngle, anotherCar.getLongitude(), anotherCar.getLatitude(), anotherCar.getPathAngle());
+			
+			
+			//计算交点
+			
+			double k1=Math.tan(Math.toRadians(pathAngle));
+			double k2=Math.tan(Math.toRadians(anotherCar.getPathAngle()));
+			//交点坐标
+			double intersecX=(y2-y1+k1*x1-k2*x2)/(k1-k2);
+			double intersecY=(k1*k2*(x1-x2)+k1*y2-k2*y1)/(k1-k2);
+			//两车到交点的向量
+			double s2cVector[]= {intersecX-x1,intersecY-y1};
+			double r2cVector[]= {intersecX-x2,intersecY-y2};
+			
+			double svUnitVector[]= {Math.cos(Math.toRadians(pathAngle)),Math.sin(Math.toRadians(pathAngle))};
+			double rvUnitVector[]= {Math.cos(Math.toRadians(anotherCar.getPathAngle())),Math.sin(anotherCar.getPathAngle())};
+			
+			
+			if(s2cVector[0]*svUnitVector[0]+s2cVector[1]*svUnitVector[1]>0 && r2cVector[0]*rvUnitVector[0]+r2cVector[1]*rvUnitVector[1]<0) {
+				System.out.println("ICW");
+			}
+			
+			
+		}
 	}
 
 	
@@ -81,9 +128,9 @@ public class CarProperty implements Comparable<CarProperty>{
 
 	private double getDistance(CarProperty anotherCar) {
 		/**
-		 * Ready to complete
+		 * completed
 		 */
-		return 0;
+	   return posUtil.getDistance(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude());
 	}
 	
 	@Override
