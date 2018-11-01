@@ -1,6 +1,6 @@
 ompiled class file
 *.class
-
+/bin/
 # Log file
 *.log
 .classpath
