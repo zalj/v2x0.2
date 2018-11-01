@@ -2,6 +2,7 @@ package com.qm.v2x.communication;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 
 import com.qm.v2x.property.CarProperty;
 
@@ -21,49 +22,69 @@ public class UDPServer {
     public void setSelfId(int id) {
     	SELF_ID = id;
     }
-   
+    
+    public CarProperty self;
+    public ArrayList<CarProperty> others;
+    
     public UDPServer(){
         try {
-            /******* 接收数据流程**/
-            // 创建一个数据报套接字，并将其绑定到指定port上
-            datagramSocket = new DatagramSocket(PORT_NUM);
-            // DatagramPacket(byte buf[], int length),建立一个字节数组来接收UDP包
-            datagramPacket = new DatagramPacket(receMsgs, receMsgs.length);
-            // receive()来等待接收UDP数据报
-            datagramSocket.receive(datagramPacket);
-           
-            /****** 解析数据报****/
-            String receStr = new String(datagramPacket.getData(), 0 , datagramPacket.getLength());
-            System.out.println("Server Rece:" + receStr);
-            System.out.println("Server Port:" + datagramPacket.getPort());
-            handle(receStr);
+            /***** 接收数据流程 *****/
+            datagramSocket = new DatagramSocket(PORT_NUM);// 创建一个数据报套接字，并将其绑定到指定port上
+            datagramPacket = new DatagramPacket(receMsgs, receMsgs.length);// DatagramPacket(byte buf[], int length),建立一个字节数组来接收UDP包
             
-            /***** 返回ACK消息数据报*/
-            // 组装数据报
-            byte[] buf = "I receive the message".getBytes();
-            DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, datagramPacket.getAddress(), datagramPacket.getPort());
-            // 发送消息
-            datagramSocket.send(sendPacket);
+            while(true) {
+	            datagramSocket.receive(datagramPacket);// receive()来等待接收UDP数据报
+	            /****** 解析数据报****/
+	            String receStr = new String(datagramPacket.getData(), 0 , datagramPacket.getLength());
+	            System.out.println("Server Rece:" + receStr);
+	            System.out.println("Server Port:" + datagramPacket.getPort());
+	            
+	            handle(receStr);
+	            
+	            /***** 返回ACK消息数据报 *****/
+	            // 组装数据报
+	            byte[] buf = "I receive the message".getBytes();
+	            DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, datagramPacket.getAddress(), datagramPacket.getPort());
+	            // 发送消息
+	            datagramSocket.send(sendPacket);
+            }
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            // 关闭socket
-            if (datagramSocket != null) {
+            if (datagramSocket != null) 
                 datagramSocket.close();
-            }
         }
     }
     /**
-     * info[0]: ID
-     * info[1]: longitude
-     * info[2]: latitude
-     * info[3]: speedRate
-     * info[4]: pathAngle
+     * info[0]: ID			int
+     * info[1]: Longitude	double
+     * info[2]: Latitude	double
+     * info[3]: Seed Rate	double
+     * info[4]: Path Angle	double
      */
+    
     private void handle(String receStr) {
     	String[] info = receStr.split(",");
+    	int carID = Integer.parseInt(info[0]);
+    	double longitude = Double.parseDouble(info[1]);
+    	double latitude = Double.parseDouble(info[2]);
+    	double speedRate = Double.parseDouble(info[3]);
+    	double pathAngle = Double.parseDouble(info[4]);
+    	if(Integer.parseInt(info[0]) == SELF_ID) {
+    		self = new CarProperty(carID, longitude, latitude, speedRate, pathAngle);
+    	}else {
+			others.add(new CarProperty(carID, longitude, latitude, speedRate, pathAngle));
+		}
+    	
+    	/**
+    	 * 	此处还需要对others进行排序，然后使用foreach循环，对others进行遍历，判断危险程度。
+    	 * 	对others按照距离由小到大排序
+    	 */
+    	for(CarProperty anotherCar : others) {
+    		self.checkState(anotherCar);
+    	}
 	}
 
 	public static void main(String[] args) {
