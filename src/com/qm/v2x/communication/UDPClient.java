@@ -4,28 +4,32 @@ import java.io.IOException;
 import java.net.*;
 
 public class UDPClient {
-		   
+
     private String sendStr = "SendString";
     private String netAddress = "127.0.0.1";
     private final int PORT_NUM = 5066;
-   
-    private DatagramSocket datagramSocket;
+    private final static int DEFAULT_ID = 0x1;		// è½¦çš„é»˜è®¤ç¼–å·
+    private static int SELF_ID;						// è½¦çš„å”¯ä¸€è¾¨è¯†ID
+
+    private static void setSELF_ID(int sELF_ID) {
+		SELF_ID = sELF_ID;
+	}
+
+	private DatagramSocket datagramSocket;
     private DatagramPacket datagramPacket;
-   
-    public UDPClient(){
-        try {
-           
-            /*** ·¢ËÍÊı¾İ***/
-            // ³õÊ¼»¯datagramSocket,×¢ÒâÓëÇ°ÃæServer¶ËÊµÏÖµÄ²î±ğ
-            datagramSocket = new DatagramSocket();
-            // Ê¹ÓÃDatagramPacket(byte buf[], int length, InetAddress address, int port)º¯Êı×é×°·¢ËÍUDPÊı¾İ±¨
-            byte[] buf = sendStr.getBytes();
+    
+    public UDPClient(int id) {
+    	setSELF_ID(id);
+    	try {
+            /*** å‘é€æ•°æ®***/
+            datagramSocket = new DatagramSocket();	// åˆå§‹åŒ–datagramSocket,æ³¨æ„ä¸å‰é¢Serverç«¯å®ç°çš„å·®åˆ«
+            byte[] buf = sendStr.getBytes();		// ä½¿ç”¨DatagramPacket(byte buf[], int length, InetAddress address, int port)å‡½æ•°ç»„è£…å‘é€UDPæ•°æ®æŠ¥
             InetAddress address = InetAddress.getByName(netAddress);
             datagramPacket = new DatagramPacket(buf, buf.length, address, PORT_NUM);
-            // ·¢ËÍÊı¾İ
+            // å‘é€æ•°æ®
             datagramSocket.send(datagramPacket);
            
-            /*** ½ÓÊÕÊı¾İ***/
+            // æ¥æ”¶æ•°æ®
             byte[] receBuf = new byte[1024];
             DatagramPacket recePacket = new DatagramPacket(receBuf, receBuf.length);
             datagramSocket.receive(recePacket);
@@ -34,7 +38,6 @@ public class UDPClient {
             System.out.println("Client Rece Ack:" + receStr);
             System.out.println(recePacket.getPort());
            
-           
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -42,11 +45,13 @@ public class UDPClient {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            // ¹Ø±Õsocket
-            if(datagramSocket != null){
+            if(datagramSocket != null)
                 datagramSocket.close();
-            }
         }
+    }
+    
+    public UDPClient(){
+        this(DEFAULT_ID);
     }  
     public static void main(String[] args) {
 		UDPClient client = new UDPClient();

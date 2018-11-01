@@ -9,11 +9,11 @@ public class CarProperty {
 	private final int SPEED_RATE = 4;
 	private final int PATH_ANGLE = 5;
 	
-	private int carID;				// Î¨Ò»±êÊ¶Ò»Á¾ÊÔÑé³µµÄID
-	private double longitude;		// ¾­¶È
-	private double latitude;		// Î³¶È
-	private double speedRate;		// ĞĞÊ»ËÙÂÊ
-	private double pathAngle;		// º½Ïò½Ç
+	private int carID;				// å”¯ä¸€æ ‡è¯†ä¸€è¾†è¯•éªŒè½¦çš„ID
+	private double longitude;		// ç»åº¦
+	private double latitude;		// çº¬åº¦
+	private double speedRate;		// è¡Œé©¶é€Ÿç‡
+	private double pathAngle;		// èˆªå‘è§’
 	
 	public double getField(int field) throws IOException {
 		if(field == CAR_ID)

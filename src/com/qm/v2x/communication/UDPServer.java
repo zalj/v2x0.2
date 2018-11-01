@@ -7,17 +7,18 @@ import java.util.ArrayList;
 import com.qm.v2x.property.CarProperty;
 
 public class UDPServer {
-    // ¶¨ÒåÒ»Ğ©³£Á¿
-    private final int MAX_LENGTH = 1024; // ×î´ó½ÓÊÕ×Ö½Ú³¤¶È
-    private final int PORT_NUM   = 5066;   // portºÅ
-    // ÓÃÒÔ´æ·Å½ÓÊÕÊı¾İµÄ×Ö½ÚÊı×é
+    // å®šä¹‰ä¸€äº›å¸¸é‡
+    private final int MAX_LENGTH = 1024; // æœ€å¤§æ¥æ”¶å­—èŠ‚é•¿åº¦
+    private final int PORT_NUM   = 5066;   // portå·
+    // ç”¨ä»¥å­˜æ”¾æ¥æ”¶æ•°æ®çš„å­—èŠ‚æ•°ç»„
     private byte[] receMsgs = new byte[MAX_LENGTH];
-    // Êı¾İ±¨Ì×½Ó×Ö
+    // æ•°æ®æŠ¥å¥—æ¥å­—
     private DatagramSocket datagramSocket;
-    // ÓÃÒÔ½ÓÊÕÊı¾İ±¨
+    // ç”¨ä»¥æ¥æ”¶æ•°æ®æŠ¥
     private DatagramPacket datagramPacket;
     
-    private static int SELF_ID = 1;
+    private static final int DEFAULT_ID = 0x1;
+    private static int SELF_ID;
     
     public void setSelfId(int id) {
     	SELF_ID = id;
@@ -26,26 +27,27 @@ public class UDPServer {
     public CarProperty self;
     public ArrayList<CarProperty> others;
     
-    public UDPServer(){
+    public UDPServer(int id){
+    	setSelfId(id);
         try {
-            /***** ½ÓÊÕÊı¾İÁ÷³Ì *****/
-            datagramSocket = new DatagramSocket(PORT_NUM);// ´´½¨Ò»¸öÊı¾İ±¨Ì×½Ó×Ö£¬²¢½«Æä°ó¶¨µ½Ö¸¶¨portÉÏ
-            datagramPacket = new DatagramPacket(receMsgs, receMsgs.length);// DatagramPacket(byte buf[], int length),½¨Á¢Ò»¸ö×Ö½ÚÊı×éÀ´½ÓÊÕUDP°ü
+            /***** æ¥æ”¶æ•°æ®æµç¨‹ *****/
+            datagramSocket = new DatagramSocket(PORT_NUM);// åˆ›å»ºä¸€ä¸ªæ•°æ®æŠ¥å¥—æ¥å­—ï¼Œå¹¶å°†å…¶ç»‘å®šåˆ°æŒ‡å®športä¸Š
+            datagramPacket = new DatagramPacket(receMsgs, receMsgs.length);// DatagramPacket(byte buf[], int length),å»ºç«‹ä¸€ä¸ªå­—èŠ‚æ•°ç»„æ¥æ¥æ”¶UDPåŒ…
             
             while(true) {
-	            datagramSocket.receive(datagramPacket);// receive()À´µÈ´ı½ÓÊÕUDPÊı¾İ±¨
-	            /****** ½âÎöÊı¾İ±¨****/
+	            datagramSocket.receive(datagramPacket);// receive()æ¥ç­‰å¾…æ¥æ”¶UDPæ•°æ®æŠ¥
+	            /****** è§£ææ•°æ®æŠ¥****/
 	            String receStr = new String(datagramPacket.getData(), 0 , datagramPacket.getLength());
 	            System.out.println("Server Rece:" + receStr);
 	            System.out.println("Server Port:" + datagramPacket.getPort());
 	            
 	            handle(receStr);
 	            
-	            /***** ·µ»ØACKÏûÏ¢Êı¾İ±¨ *****/
-	            // ×é×°Êı¾İ±¨
+	            /***** è¿”å›ACKæ¶ˆæ¯æ•°æ®æŠ¥ *****/
+	            // ç»„è£…æ•°æ®æŠ¥
 	            byte[] buf = "I receive the message".getBytes();
 	            DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, datagramPacket.getAddress(), datagramPacket.getPort());
-	            // ·¢ËÍÏûÏ¢
+	            // å‘é€æ¶ˆæ¯
 	            datagramSocket.send(sendPacket);
             }
         } catch (SocketException e) {
@@ -57,6 +59,11 @@ public class UDPServer {
                 datagramSocket.close();
         }
     }
+    
+    public UDPServer() {
+    	this(DEFAULT_ID);
+    }
+    
     /**
      * info[0]: ID			int
      * info[1]: Longitude	double
@@ -79,8 +86,8 @@ public class UDPServer {
 		}
     	
     	/**
-    	 * 	´Ë´¦»¹ĞèÒª¶Ôothers½øĞĞÅÅĞò£¬È»ºóÊ¹ÓÃforeachÑ­»·£¬¶Ôothers½øĞĞ±éÀú£¬ÅĞ¶ÏÎ£ÏÕ³Ì¶È¡£
-    	 * 	¶Ôothers°´ÕÕ¾àÀëÓÉĞ¡µ½´óÅÅĞò
+    	 * 	æ­¤å¤„è¿˜éœ€è¦å¯¹othersè¿›è¡Œæ’åºï¼Œç„¶åä½¿ç”¨foreachå¾ªç¯ï¼Œå¯¹othersè¿›è¡Œéå†ï¼Œåˆ¤æ–­å±é™©ç¨‹åº¦ã€‚
+    	 * 	å¯¹othersæŒ‰ç…§è·ç¦»ç”±å°åˆ°å¤§æ’åº
     	 */
     	for(CarProperty anotherCar : others) {
     		self.checkState(anotherCar);
