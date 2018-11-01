@@ -1,4 +1,4 @@
-ompiled class file
+# Compiled class file
 *.class
 /bin/
 # Log file
@@ -21,3 +21,25 @@ ompiled class file
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/.settings/
+/target/
+ 
+# built application files
+*.apk
+*.ap_
+ 
+# files for the dex VM
+*.dex
+ 
+# Java class files
+*.class
+*.jar
+ 
+# generated files
+bin/
+gen/
+ 
+# Eclipse project files
+.classpath
+.project
+.DS_Store
