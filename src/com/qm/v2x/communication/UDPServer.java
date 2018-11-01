@@ -2,7 +2,7 @@ package com.qm.v2x.communication;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 import com.qm.v2x.property.CarProperty;
 
@@ -25,7 +25,7 @@ public class UDPServer {
     }
     
     public CarProperty self;
-    public ArrayList<CarProperty> others;
+    public PriorityQueue<CarProperty> others;
     
     public UDPServer(int id){
     	setSelfId(id);

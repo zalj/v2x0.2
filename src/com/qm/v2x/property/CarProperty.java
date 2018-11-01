@@ -2,7 +2,7 @@ package com.qm.v2x.property;
 
 import java.io.IOException;
 
-public class CarProperty {
+public class CarProperty implements Comparable<CarProperty>{
 	private final int CAR_ID = 1;
 	private final int LONGITUDE = 2;
 	private final int LATITUDE = 3;
@@ -77,5 +77,17 @@ public class CarProperty {
 	@Override
 	public String toString() {
 		return "[" + carID + ", " + longitude + ", " + latitude + ", " + speedRate + ", " + pathAngle + "]";
+	}
+
+	private double getDistance(CarProperty anotherCar) {
+		/**
+		 * Ready to complete
+		 */
+		return 0;
+	}
+	
+	@Override
+	public int compareTo(CarProperty o) {
+		return (int)getDistance(o);
 	}
 }
