@@ -3,6 +3,8 @@ package com.qm.v2x.communication;
 import java.io.IOException;
 import java.net.*;
 
+import com.qm.v2x.property.CarProperty;
+
 public class UDPServer {
     // 定义一些常量
     private final int MAX_LENGTH = 1024; // 最大接收字节长度
@@ -13,6 +15,12 @@ public class UDPServer {
     private DatagramSocket datagramSocket;
     // 用以接收数据报
     private DatagramPacket datagramPacket;
+    
+    private static int SELF_ID = 1;
+    
+    public void setSelfId(int id) {
+    	SELF_ID = id;
+    }
    
     public UDPServer(){
         try {
@@ -28,7 +36,8 @@ public class UDPServer {
             String receStr = new String(datagramPacket.getData(), 0 , datagramPacket.getLength());
             System.out.println("Server Rece:" + receStr);
             System.out.println("Server Port:" + datagramPacket.getPort());
-           
+            handle(receStr);
+            
             /***** 返回ACK消息数据报*/
             // 组装数据报
             byte[] buf = "I receive the message".getBytes();
@@ -46,7 +55,18 @@ public class UDPServer {
             }
         }
     }
-    public static void main(String[] args) {
+    /**
+     * info[0]: ID
+     * info[1]: longitude
+     * info[2]: latitude
+     * info[3]: speedRate
+     * info[4]: pathAngle
+     */
+    private void handle(String receStr) {
+    	String[] info = receStr.split(",");
+	}
+
+	public static void main(String[] args) {
 		UDPServer server = new UDPServer();
 	}
 }
