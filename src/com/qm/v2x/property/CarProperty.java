@@ -1,6 +1,8 @@
 package com.qm.v2x.property;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import com.qm.v2x.util.Geo;
 import com.qm.v2x.util.posUtil;
@@ -65,12 +67,15 @@ public class CarProperty implements Comparable<CarProperty>{
     	double x2=coord2[0];
     	double y2=coord2[0];
 		
-		//FCW
+		//FCW&&EBL
 		if( posUtil.getDistance(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude())<20.0 &&
 				posUtil.verticalDistance(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude(), pathAngle)<3.5 &&
-					posUtil.inFront(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude(), pathAngle) &&
+					posUtil.inFront(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude(), pathAngle)>0.866 &&
 						Math.abs(pathAngle-anotherCar.getPathAngle())<20.0) {
 			System.out.println("FCW");
+			if(speedRate-anotherCar.getSpeedRate()>30.0) {
+				System.out.println("EBL");
+			}
 		}
 		
 		//ICW
@@ -99,9 +104,23 @@ public class CarProperty implements Comparable<CarProperty>{
 				System.out.println("ICW");
 			}
 			
-			
+		}
+		
+		
+	}
+	
+	public void checkSignState(ArrayList<Sign> signs) {
+		Iterator<Sign> iterator=signs.iterator();
+		while(iterator.hasNext()) {
+			Sign temp = (Sign) iterator.next();
+			if(posUtil.getDistance(longitude, latitude, temp.getPosLon(), temp.getPosLat())<temp.getRadius() &&
+					posUtil.inFront(longitude, latitude, temp.getPosLon(), temp.getPosLat(), pathAngle)>0.707) {
+				System.out.println(temp.getContext());
+			}
 		}
 	}
+	
+//	public void checkTrafficLight(Array)
 
 	
 	

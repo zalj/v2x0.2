@@ -33,7 +33,7 @@ public class posUtil {
     	
     }
     
-    public static boolean inFront(double lng1, double lat1, double lng2,double lat2,double hvAngle) {
+    public static double inFront(double lng1, double lat1, double lng2,double lat2,double hvAngle) {
     	
     	double[] coord1=Geo.convertToXY(lng1, lat1);
     	double x1=coord1[0];
@@ -42,11 +42,10 @@ public class posUtil {
     	double x2=coord2[0];
     	double y2=coord2[0];
     	
-    	double flag=(x2-x1)*Math.cos(Math.toRadians(hvAngle))+(y2-y1)*Math.sin(Math.toRadians(hvAngle));
-    	if(flag>=0)
-    		return true;
-    	else
-    		return false;
+    	double unit_x=(x2-x1)/Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    	double unit_y=(y2-y1)/Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    	double flag=unit_x*Math.cos(Math.toRadians(hvAngle))+unit_y*Math.sin(Math.toRadians(hvAngle));
+    	return flag;
     }
     
     
