@@ -7,6 +7,7 @@ import java.util.Iterator;
 import com.qm.v2x.util.Geo;
 import com.qm.v2x.util.posUtil;
 
+
 public class CarProperty implements Comparable<CarProperty>{
 	private final int CAR_ID = 1;
 	private final int LONGITUDE = 2;
@@ -19,6 +20,7 @@ public class CarProperty implements Comparable<CarProperty>{
 	private double latitude;		// 纬度
 	private double speedRate;		// 行驶速率
 	private double pathAngle;		// 航向角
+	
 	
 	public double getField(int field) throws IOException {
 		if(field == CAR_ID)
@@ -73,7 +75,30 @@ public class CarProperty implements Comparable<CarProperty>{
 					posUtil.inFront(longitude, latitude, anotherCar.getLongitude(), anotherCar.getLatitude(), pathAngle)>0.866 &&
 						Math.abs(pathAngle-anotherCar.getPathAngle())<20.0) {
 			System.out.println("FCW");
-			if(speedRate-anotherCar.getSpeedRate()>30.0) {
+			
+				//FCW中的安全距离
+				final double T_MAX=2.0;
+				final double A_MIN=3.6;
+				
+				double relativeSpeed=speedRate-anotherCar.getSpeedRate();
+				
+				double dmax=relativeSpeed*T_MAX+relativeSpeed*relativeSpeed/(A_MIN*2.0);
+				//需要导出的数据
+				int FCWLevel=-1;
+				
+				if(dmax>0&&dmax<=5.0) {
+					FCWLevel=3;
+				}else if(dmax>5.0&&dmax<=7.5) {
+					FCWLevel=2;
+				}else if(dmax>7.5&&dmax<10.0) {
+					FCWLevel=1;
+				}else {
+					FCWLevel=0;
+				}
+				
+				
+			
+			if(speedRate-anotherCar.getSpeedRate()>5.0) {
 				System.out.println("EBL");
 			}
 		}
@@ -102,6 +127,28 @@ public class CarProperty implements Comparable<CarProperty>{
 			
 			if(s2cVector[0]*svUnitVector[0]+s2cVector[1]*svUnitVector[1]>0 && r2cVector[0]*rvUnitVector[0]+r2cVector[1]*rvUnitVector[1]<0) {
 				System.out.println("ICW");
+				
+				//ICW参数计算
+				//计算碰撞时间
+				double distanceS2C=Math.sqrt((intersecX-x1)*(intersecX-x1)+(intersecY-y1)*(intersecY-y1));
+				double distanceR2C=Math.sqrt((intersecX-x2)*(intersecX-x2)+(intersecY-y2)*(intersecY-y2));
+				double time =  Math.abs(distanceS2C/speedRate - distanceR2C/anotherCar.getSpeedRate() );
+				
+				final int level1max = 7;  //1级碰撞触发最大时间差
+			    final int level2max = 15; //2级碰撞触发最大时间差
+			    final int level3max = 25; //3级碰撞触发最大时间差
+			    //需要导出的数据
+			    int ICWLevel=-1;
+				//判定等级
+		        if (time >= 0 && time <= level1max) {
+		        	ICWLevel = 1;
+		        } else if (time > level1max && time <= level2max) {
+		        	ICWLevel = 2;
+		        } else if (time > level2max && time <= level3max) {
+		        	ICWLevel = 3;
+			    } else {
+			    	ICWLevel = -1;
+			    }
 			}
 			
 		}
@@ -116,11 +163,22 @@ public class CarProperty implements Comparable<CarProperty>{
 			if(posUtil.getDistance(longitude, latitude, temp.getPosLon(), temp.getPosLat())<temp.getRadius() &&
 					posUtil.inFront(longitude, latitude, temp.getPosLon(), temp.getPosLat(), pathAngle)>0.707) {
 				System.out.println(temp.getContext());
+				//需要导出的数据：预警信号的id和内容
 			}
 		}
 	}
 	
-//	public void checkTrafficLight(Array)
+	public void checkTrafficLight(ArrayList<TrafficLight> trafficLights) {
+		Iterator<TrafficLight> iterator=trafficLights.iterator();
+		while(iterator.hasNext()) {
+			TrafficLight temp=(TrafficLight)iterator.next();
+			if(posUtil.getDistance(longitude, latitude, temp.getLongitude(), temp.getLatitude()) < 20.0 &&
+					posUtil.inFront(longitude, latitude, temp.getLongitude(), temp.getLatitude(), pathAngle)>0.707) {
+				System.out.println("绿波通行");
+			}
+		}
+		
+	}
 
 	
 	
