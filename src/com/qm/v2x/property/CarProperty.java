@@ -2,6 +2,7 @@ package com.qm.v2x.property;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import com.qm.v2x.util.Geo;
@@ -175,6 +176,38 @@ public class CarProperty implements Comparable<CarProperty>{
 			if(posUtil.getDistance(longitude, latitude, temp.getLongitude(), temp.getLatitude()) < 20.0 &&
 					posUtil.inFront(longitude, latitude, temp.getLongitude(), temp.getLatitude(), pathAngle)>0.707) {
 				System.out.println("绿波通行");
+				
+				Phase[] tempPhases=temp.getPhases();
+				for(Phase tempPhase :tempPhases) {
+					//通行车辆与红绿灯对应车辆的偏角在15度范围内
+					if(Math.abs(pathAngle-tempPhase.pathAngel)<15.0) {
+						//计算到停车线的距离，暂定停车线到交通灯的中心距离为3m
+						double stopmarkDistance=(posUtil.getDistance(longitude, latitude, temp.getLongitude(), temp.getLatitude())-3.0);
+						if(stopmarkDistance<0) {
+							stopmarkDistance=0;
+						}
+						
+						int status=tempPhase.status;
+						int timeLeft=tempPhase.timeLeft;
+						
+						switch (status) {
+						case 1:
+							
+							break;
+						case 2:
+							if(timeLeft>0) {
+								int minSpeed = (int) Math.round(((stopmarkDistance / timeLeft) * 3.6f));
+							}
+							
+							break;
+						case 3:
+							break;
+						default:
+							break;
+						}
+						
+					}
+				}
 			}
 		}
 		
